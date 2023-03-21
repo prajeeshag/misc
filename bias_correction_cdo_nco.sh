@@ -30,7 +30,6 @@ $CDO -yhourmean -del29feb -cat "$iDIR/va_6hrPlevPt_MPI-ESM1-2-HR_historical_r1i1
 for ifile in $iDIR/va_6hrPlevPt_MPI-ESM1-2-HR_historical_r1i1p1f1_gn_2000????????-????????????.nc ; do
     fnm_wo_ext=$(basename -- "$ifile" | cut -f1 -d'.')
     srun $CDO -sub $ifile va_MPI_correction.nc ${fnm_wo_ext}_corrected.nc &
-    break
 done
 
 wait
