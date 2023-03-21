@@ -8,7 +8,7 @@
 
 iDIR=/lustre/scratch/dasarih/MPIdata/mpi_plev_data/historical
 eDIR=/project/k1254/hari/datasets/era_data/1959-2022
-NCRA=/project/k1028/pag/mambaforge/bin/ncra
+#NCRA=/project/k1028/pag/mambaforge/bin/ncra
 CDO=/project/k1028/pag/mambaforge/bin/cdo
 
 # I tested only this (I don't have access to project k1254), it works and take about 18 minutes to complete
@@ -27,9 +27,12 @@ $CDO -yhourmean -del29feb -cat "$iDIR/va_6hrPlevPt_MPI-ESM1-2-HR_historical_r1i1
 # $CDO -sub va_era_mean_remapped.nc va_6hrPlevPt_MPI-ESM1-2-HR_historical_r1i1p1f1_gn_mean.nc va_MPI_correction.nc
 
 ## Add the correction; srun here will launch it parallely 
-#for ifile in $iDIR/va_6hrPlevPt_MPI-ESM1-2-HR_historical_r1i1p1f1_gn_????????????-????????????.nc ; do
-#    fnm_wo_ext=$(basename -- "$ifile" | cut -f1 -d'.')
-#    srun $CDO -add $ifile va_MPI_correction.nc  ${fnm_wo_ext}_corrected.nc &
-#done
+for ifile in $iDIR/va_6hrPlevPt_MPI-ESM1-2-HR_historical_r1i1p1f1_gn_2000????????-????????????.nc ; do
+    fnm_wo_ext=$(basename -- "$ifile" | cut -f1 -d'.')
+    srun $CDO -sub $ifile va_MPI_correction.nc ${fnm_wo_ext}_corrected.nc &
+    break
+done
+
+wait
 
 
