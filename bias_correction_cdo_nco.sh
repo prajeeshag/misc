@@ -18,7 +18,7 @@ CDO=/project/k1028/pag/mambaforge/bin/cdo
 $CDO -yhourmean -del29feb -cat "$iDIR/va_6hrPlevPt_MPI-ESM1-2-HR_historical_r1i1p1f1_gn_????????????-????????????.nc" \
 	va_6hrPlevPt_MPI-ESM1-2-HR_historical_r1i1p1f1_gn_mean.nc
 
-## $CDO $eDIR/va_era_*.nc va_era_mean.nc   # I don't have access to project k1254, the filenames needs to be changed accordingly
+# $CDO -yhourmean -del29feb -cat "$eDIR/va_era_*.nc" va_era_mean.nc   # I don't have access to project k1254, the filenames needs to be changed accordingly
 
 ##If ERA data is not on the same horizontal grid as MPI, it needs to be remapped
 # $CDO -remapbil,va_6hrPlevPt_MPI-ESM1-2-HR_historical_r1i1p1f1_gn_mean.nc va_era_mean.nc va_era_mean_remapped.nc
