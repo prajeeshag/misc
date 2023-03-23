@@ -9,7 +9,7 @@ set -e
 eDIR=/project/k1028/pag/DATA/ERA
 CDO=/project/k1028/pag/mambaforge/bin/cdo
 startYear=1980
-endYear=2000
+endYear=2014
 
 outDir=6hr_clim_${startYear}-${endYear}
 rm -rf $outDir || echo "$outDir does not exist..."

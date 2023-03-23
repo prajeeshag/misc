@@ -5,17 +5,23 @@
 iDIR=/lustre/scratch/dasarih/MPIdata/mpi_plev_data/historical
 eDIR=/project/k1028/pag/DATA/ERA/6hr_clim_1980-2014/
 
-#NCRA=/project/k1028/pag/mambaforge/bin/ncra
+NCREMAP=/project/k1028/pag/mambaforge/bin/ncremap
 CDO=/project/k1028/pag/mambaforge/bin/cdo
-
-ERAyearS=1980
-ERAyearE=2014
 
 declare -A varNames
 varNames["ta"]="var130"
 varNames["ua"]="var131"
 varNames["va"]="var132"
 varNames["hus"]="var133"
+
+# Regrid ERA5 data to Model grid
+# Get the destination grid file
+#dst_grid=$(eval ls $iDIR/ta_*.nc | head -n1)
+#plev_fl=$dst_grid
+
+#ncremap -I drc_in -d dst.nc -O regrid
+
+# Extract plev
 
 # I tested only this (I don't have access to project k1254), it works and take about 18 minutes to complete
 $CDO -yhourmean -del29feb -cat "$iDIR/va_6hrPlevPt_MPI-ESM1-2-HR_historical_r1i1p1f1_gn_????????????-????????????.nc" \
