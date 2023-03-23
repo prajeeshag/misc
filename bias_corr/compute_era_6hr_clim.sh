@@ -1,42 +1,34 @@
 #!/bin/bash
 #SBATCH -N 1
-#SBATCH --ntasks-per-node=6
+#SBATCH --ntasks-per-node=12
 #SBATCH --partition=workq
-#SBATCH -t 20:00:00
-###SBATCH --exclusive
-###SBATCH --mem=0
-#SBATCH 
-#
+#SBATCH -t 23:00:00
 
-iDIR=/lustre/scratch/dasarih/MPIdata/mpi_plev_data/historical
+set -e
+
 eDIR=/project/k1028/pag/DATA/ERA
-#NCRA=/project/k1028/pag/mambaforge/bin/ncra
 CDO=/project/k1028/pag/mambaforge/bin/cdo
+startYear=1980
+endYear=2000
 
-ERAyyS=1980
-ERAyyE=2014
-
-vars="ta ua va hus"
-
-#ECMWF Grib record numbers
-declare -A varNames
-varNames["ta"]="var130"
-varNames["ua"]="var131"
-varNames["va"]="var132"
-varNames["hus"]="var133"
+outDir=6hr_clim_${startYear}-${endYear}
+rm -rf $outDir || echo "$outDir does not exist..."
+mkdir -p $outDir
 
 for mm in {01..12}; do
-    if [ $mm == "02" ]; then
-	continue
-    fi
-    ifiles=$(eval ls $eDIR/{$ERAyyS..$ERAyyE}/????_${mm}_prs.grib)
-    echo $CDO -f nc -ensmean $ifiles ${mm}_6hr_clim_${ERAyyS}-${ERAyyE}.nc
-    srun --ntasks=1 --exclusive --mem=0 $CDO -f nc -ensmean $ifiles ${mm}_6hr_clim_${ERAyyS}-${ERAyyE}.nc &
+    ifilesL=" "
+    ifiles=" "
+    for yy in $(seq $startYear $endYear); do
+        if [ $mm == "02" ] && [ "$(( $yy % 4 ))" -eq 0 ]; then
+    	    echo "Leap year... $yy"
+    	    ifilesL=$ifilesL" -del29feb $(eval ls $eDIR/$yy/????_${mm}_prs.grib)"
+        else
+    	    ifiles=$ifiles" $(eval ls $eDIR/$yy/????_${mm}_prs.grib)"
+        fi
+    done
+    ifiles="$ifiles $ifilesL"
+    echo $CDO -f nc -ensmean $ifiles $outDir/${mm}_6hr_clim_${startYear}-${endYear}.nc
+    srun --ntasks=1 --exclusive --mem=0 $CDO -f nc -ensmean $ifiles $outDir/${mm}_6hr_clim_${startYear}-${endYear}.nc &
 done
 wait
 
-#for var in $vars; do
-#    echo $CDO -mergetime ${var}_??_6hr_clim_${ERAyyS}-${ERAyyE}.nc ${var}_6hr_clim_${ERAyyS}-${ERAyyE}.nc
-#    srun $CDO -mergetime ${var}_??_6hr_clim_${ERAyyS}-${ERAyyE}.nc ${var}_6hr_clim_${ERAyyS}-${ERAyyE}.nc &
-#done
-#wait
