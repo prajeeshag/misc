@@ -1,18 +1,21 @@
 #!/bin/bash
 #SBATCH -N 1
-#SBATCH --partition=debug
+#SBATCH --partition=workq
+#SBATCH -t 23:00:00
 
-iDIR=/lustre/scratch/dasarih/MPIdata/mpi_plev_data/historical
-eDIR=/path/to/correction/files/
-
+iDIR=/scratch/dasarih/CMIP6_data/plev_data/MPI-ESM1-2-HR/historical
+eDIR="."
 CDO=/project/k1028/pag/mambaforge/bin/cdo
+SRUN="srun "
+#SRUN="echo"
 
-## Apply the correction; srun here will launch it parallely 
-for ifile in $iDIR/va_6hrPlevPt_MPI-ESM1-2-HR_historical_r1i1p1f1_gn_2000????????-????????????.nc ; do
+fileNmC="_6hrPlevPt_MPI-ESM1-2-HR_historical_r1i1p1f1_gn_"
+var="$1"
+for ifile in `ls $iDIR/${var}${fileNmC}????????????-????????????.nc` ; do
+    echo $ifile
+    corrFile=$eDIR/${var}${fileNmC}Corr.nc
     fnm_wo_ext=$(basename -- "$ifile" | cut -f1 -d'.')
-    srun $CDO -sub $ifile va_MPI_correction.nc ${fnm_wo_ext}_corrected.nc &
+    $SRUN $CDO -add $ifile $corrFile ${fnm_wo_ext}_corrected.nc
 done
-
-wait
 
 
