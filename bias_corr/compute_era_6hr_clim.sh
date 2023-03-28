@@ -6,16 +6,18 @@
 
 set -e
 
-eDIR=/project/k1028/pag/DATA/ERA
+eDIR=/project/k1254/hari/datasets/era_data/1959-2022
 CDO=/project/k1028/pag/mambaforge/bin/cdo
 startYear=1980
-endYear=2014
+endYear=2000
+SRUN="srun --ntasks=1 --exclusive --mem=0"
+#SRUN=echo
 
 outDir=6hr_clim_${startYear}-${endYear}
-rm -rf $outDir || echo "$outDir does not exist..."
-mkdir -p $outDir
+#rm -rf $outDir || echo "$outDir does not exist..."
+mkdir -p $outDir || echo "mkdir $outDir failed..."
 
-for mm in {01..12}; do
+for mm in $@; do
     ifilesL=" "
     ifiles=" "
     for yy in $(seq $startYear $endYear); do
@@ -27,8 +29,8 @@ for mm in {01..12}; do
         fi
     done
     ifiles="$ifiles $ifilesL"
-    echo $CDO -f nc -ensmean $ifiles $outDir/${mm}_6hr_clim_${startYear}-${endYear}.nc
-    srun --ntasks=1 --exclusive --mem=0 $CDO -f nc -ensmean $ifiles $outDir/${mm}_6hr_clim_${startYear}-${endYear}.nc &
+    echo  $CDO -f nc -ensmean $ifiles $outDir/${mm}_6hr_clim_${startYear}-${endYear}.nc
+    $SRUN $CDO -f nc -ensmean $ifiles $outDir/${mm}_6hr_clim_${startYear}-${endYear}.nc &
 done
 wait
 
