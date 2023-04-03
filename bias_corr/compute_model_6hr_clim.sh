@@ -6,29 +6,26 @@
 
 set -e
 
-eDIR=/lustre/scratch/dasarih/MPIdata/mpi_plev_data/historical/
+startYear=1980
+endYear=2000
+eDIR=/scratch/dasarih/CMIP6_data/plev_data/MPI-ESM1-2-HR/historical
 CDO=/project/k1028/pag/mambaforge/bin/cdo
-
-vars="hus ta ua va"
+SRUN="srun --ntasks=1 --exclusive --mem=0"
+#SRUN=echo
 
 #This scripts needs the files to be distributed in yearly
-for var in $vars; do
+for var in $@; do
     ifiles=" "
-    ifilesL=" "
     for file in $eDIR/${var}_*.nc; do
         yy=${file: -28:4}
-        if [ "$(( $yy % 4 ))" -eq 0 ]; then
-    	    echo "Leap year... $yy"
-    	    ifilesL=$ifilesL" -del29feb $file"
-        else
-    	    ifiles=$ifiles" $file"
+        if [ "$yy" -lt "$startYear" ] || [ "$yy" -gt "$endYear" ]; then
+            continue
         fi
+    	ifiles=$ifiles" -del29feb $file"
     done
-    ifiles="$ifiles $ifilesL"
     bfnm=$(basename $file)
-    ofile=${bfnm: 0:-29}_clim.nc
-    echo $CDO -f nc -ensmean $ifiles $ofile
-    srun --ntasks=1 --exclusive --mem=0 $CDO -f nc -ensmean $ifiles $ofile &
+    ofile=${bfnm: 0:-29}_clim_${startYear}-${endYear}.nc
+    $SRUN $CDO -f nc -ensmean $ifiles $ofile &
 done
 wait
 
