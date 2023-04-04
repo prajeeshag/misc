@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH -N 1
 #SBATCH --ntasks-per-node=1
-#SBATCH --partition=debug
-##SBATCH -t 23:00:00
-#SBATCH -t 00:30:00
+#SBATCH --partition=workq
+#SBATCH -t 10:00:00
+##SBATCH -t 00:30:00
 
 set -e
 
