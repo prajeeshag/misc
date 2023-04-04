@@ -3,6 +3,8 @@
 #SBATCH --partition=workq
 #SBATCH -t 23:00:00
 
+set -e
+
 startYear=1980
 endYear=2000
 
@@ -12,15 +14,14 @@ CDO=/project/k1028/pag/mambaforge/bin/cdo
 SRUN="srun "
 #SRUN="echo"
 
-odir="bias_corrected_${startYear}-${endYear}
-mkdir bias_corrected_
-fileNmC="_6hrPlevPt_MPI-ESM1-2-HR_historical_r1i1p1f1_gn_"
+fileNmC="6hrPlevPt_MPI-ESM1-2-HR_historical_r1i1p1f1_gn"
 var="$1"
-for ifile in `ls $iDIR/${var}${fileNmC}????????????-????????????.nc` ; do
+mkdir -p corrected
+for ifile in `ls $iDIR/${var}_${fileNmC}_????????????-????????????.nc` ; do
     echo $ifile
-    corrFile=$eDIR/${var}${fileNmC}Corr.nc
+    corrFile=$eDIR/${var}_${fileNmC}_Corr_${startYear}-${endYear}.nc
     fnm_wo_ext=$(basename -- "$ifile" | cut -f1 -d'.')
-    $SRUN $CDO -add $ifile $corrFile ${fnm_wo_ext}_corrected.nc
+    $SRUN $CDO -add $ifile $corrFile corrected/${fnm_wo_ext}.nc
 done
 
 

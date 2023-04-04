@@ -3,9 +3,9 @@
 ###SBATCH --mail-user=prajeesh.athippattagopinathan@kaust.edu.sa
 ###SBATCH --mail-type=ALL
 #SBATCH -A k1028
-#SBATCH --partition=workq
-#SBATCH -t 20:00:00
-##SBATCH -t 00:30:00
+#SBATCH --partition=debug
+##SBATCH -t 20:00:00
+#SBATCH -t 00:30:00
 
 set -ex
 
@@ -21,24 +21,24 @@ SRUN="srun --ntasks=1 --exclusive --mem=0"
 #SRUN=echo
 
 vars=$@
-varsNN="var130,var131,var132,var133"
 
-declare -A varN
-varN["ta"]="var130"
-varN["ua"]="var131"
-varN["va"]="var132"
-varN["hus"]="var133"
-
-echo "Mergeing and renaming the variables..."
-ifiles=$(ls ERA_CLIM_on_MPI-ESM1-2-HR_grid/*_${startYear}-${endYear}.nc)
+echo "Mergeing the ERA clim files.."
 
 for var in $vars; do
-code=${varN[$var]}
-files=" "
-for file in $ifiles; do
-    files=$files" -setyear,2001 -setcalendar,365_day -chname,$code,$var -selvar,$code $file"
-done
-$SRUN $CDO -mergetime $files ${var}_ERA_6hr_clim_on_MPI-ESM1-2-HR_grid_${startYear}-${endYear}.nc &
+    files=" "
+    for mm in {01..12}; do
+        file=${var}_${mm}_6hr_clim_${startYear}-${endYear}_plev.nc
+        if [ "$mm" == "01" ]; then
+            last_file=last_$file
+            first_file=first_$file
+            $CDO -setyear,2002 -setcalendar,365_day -select,timestep=1 $file $last_file
+            $CDO -setyear,2001 -setcalendar,365_day -delete,timestep=1 $file $first_file
+            continue
+        fi
+        files=$files" -setyear,2001 -setcalendar,365_day $file"
+    done
+    files=$first_file" "$files" "$last_file
+    $SRUN $CDO -mergetime $files ${var}_ERA_6hr_clim_on_MPI-ESM1-2-HR_grid_${startYear}-${endYear}.nc &
 done
 wait
 
